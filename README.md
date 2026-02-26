@@ -87,6 +87,10 @@
 ## 🎬 Retrospective
 (https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
 
+---
+## 🎬 Retrospective Phase 2
+https://youtu.be/J6PpC-khWRU
+
 
 ```mermaid
 flowchart TD
@@ -132,6 +136,4 @@ flowchart TD
     style UserFunc fill:#FFF8DC,stroke:#333,stroke-width:2px
     style AdminFunc fill:#F0FFF0,stroke:#333,stroke-width:2px ```
 
----
-## 🎬 Retrospective Phase 2
-https://youtu.be/J6PpC-khWRU
+
