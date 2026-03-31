@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "node app.js"
+    "dev": "node app.js",
+    "test": "jest --verbose",
+    "test:coverage": "jest --coverage --collectCoverageFrom=\"model/**/*.js\" --coverageReporters=text --coverageReporters=text-summary"
   },
   "dependencies": {
     "connect-flash": "^0.1.1",
@@ -16,5 +18,8 @@
     "mysql2": "^3.6.5",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
