@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="จองสนามแบดมินตัน <%= court.name %>">
+    <title>BaBadminton — จองสนาม <%= court.name %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="bg-decoration"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="/dashboard" class="navbar-brand">
+                <span class="icon">🏸</span>
+                <span>BaBadminton</span>
+            </a>
+            <div class="navbar-nav">
+                <a href="/dashboard" class="nav-link" id="nav-dashboard">📊 Dashboard</a>
+                <a href="/search" class="nav-link" id="nav-search">🔍 ค้นหาสนาม</a>
+                <a href="/calendar" class="nav-link" id="nav-calendar">📅 ปฏิทิน</a>
+                <div class="nav-user">
+                    <div class="avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+                    <div class="user-info">
+                        <span class="user-name"><%= user.username %></span>
+                        <span class="user-role"><%= user.role %></span>
+                    </div>
+                </div>
+                <a href="/logout" class="nav-link" id="nav-logout">🚪 ออก</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <div class="booking-page">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">📝 จองสนาม</h1>
+                <p class="page-subtitle">เลือกวันที่และเวลาที่ต้องการ</p>
+            </div>
+
+            <!-- Court Detail -->
+            <div class="glass-card booking-court-detail">
+                <div class="booking-court-icon">🏸</div>
+                <div>
+                    <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; margin-bottom: 8px;"><%= court.name %></h2>
+                    <div class="court-meta">
+                        <span class="court-badge badge-type">
+                            <%= court.courtType === 'double' ? '👥 คู่' : '👤 เดี่ยว' %>
+                        </span>
+                        <span class="court-badge badge-surface">
+                            <% if (court.surface === 'synthetic') { %>🟢 สังเคราะห์
+                            <% } else if (court.surface === 'wooden') { %>🟤 ไม้
+                            <% } else { %>⬜ ซีเมนต์<% } %>
+                        </span>
+                    </div>
+                    <div class="court-price" style="margin-bottom: 8px;">
+                        ฿<%= court.pricePerHour %> <span>/ ชั่วโมง</span>
+                    </div>
+                    <% if (court.description) { %>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);"><%= court.description %></p>
+                    <% } %>
+                    <% if (court.facilities && court.facilities.length > 0) { %>
+                        <div class="court-facilities mt-1">
+                            <% court.facilities.forEach(f => { %>
+                                <span class="facility-tag"><%= f %></span>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="alert alert-error">⚠️ <%= error %></div>
+            <% } %>
+
+            <!-- Booking Form -->
+            <div class="glass-card" style="padding: 24px;">
+                <h3 style="font-size: 1rem; margin-bottom: 20px; color: var(--accent-green);">📅 เลือกวันและเวลา</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">
+                    ⏰ เปิดให้บริการ 06:00 - 22:00 | ขั้นต่ำ 1 ชั่วโมง
+                </p>
+                <form method="POST" id="booking-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">📅 วันที่</label>
+                            <input type="date" name="date" class="form-control" required
+                                   min="<%= new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().split('T')[0] %>"
+                                   id="booking-date"
+                                   onchange="updateSummary()">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">🕐 เวลาเริ่ม</label>
+                            <input type="time" name="startTime" class="form-control" required
+                                   min="06:00" max="21:00"
+                                   id="booking-start-time"
+                                   onchange="updateSummary()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">🕐 เวลาสิ้นสุด</label>
+                            <input type="time" name="endTime" class="form-control" required
+                                   min="07:00" max="22:00"
+                                   id="booking-end-time"
+                                   onchange="updateSummary()">
+                        </div>
+                    </div>
+
+                    <!-- Booking Summary -->
+                    <div class="booking-summary" id="booking-summary" style="display: none;">
+                        <h4>📋 สรุปการจอง</h4>
+                        <div class="booking-summary-row">
+                            <span class="label">สนาม</span>
+                            <span class="value"><%= court.name %></span>
+                        </div>
+                        <div class="booking-summary-row">
+                            <span class="label">วันที่</span>
+                            <span class="value" id="summary-date">-</span>
+                        </div>
+                        <div class="booking-summary-row">
+                            <span class="label">เวลา</span>
+                            <span class="value" id="summary-time">-</span>
+                        </div>
+                        <div class="booking-summary-row">
+                            <span class="label">ระยะเวลา</span>
+                            <span class="value" id="summary-duration">-</span>
+                        </div>
+                        <div class="booking-summary-row booking-total">
+                            <span class="label" style="font-weight: 700;">💰 ราคารวม</span>
+                            <span class="value" id="summary-total">-</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 24px;">
+                        <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;" id="btn-confirm-booking">
+                            ✅ ยืนยันการจอง
+                        </button>
+                        <a href="/dashboard" class="btn btn-secondary btn-lg" id="btn-cancel-booking">ยกเลิก</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pricePerHour = <%= court.pricePerHour || 0 %>;
+
+        function updateSummary() {
+            const date = document.getElementById('booking-date').value;
+            const startTime = document.getElementById('booking-start-time').value;
+            const endTime = document.getElementById('booking-end-time').value;
+            const summary = document.getElementById('booking-summary');
+
+            if (date && startTime && endTime) {
+                summary.style.display = 'block';
+
+                document.getElementById('summary-date').textContent = date;
+                document.getElementById('summary-time').textContent = startTime + ' - ' + endTime;
+
+                const startMinutes = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1]);
+                const endMinutes = parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1]);
+                const durationMinutes = endMinutes - startMinutes;
+
+                if (durationMinutes >= 60) {
+                    const hours = (durationMinutes / 60).toFixed(1);
+                    document.getElementById('summary-duration').textContent = hours + ' ชั่วโมง';
+                    const total = Math.ceil(durationMinutes / 60) * pricePerHour;
+                    document.getElementById('summary-total').textContent = '฿' + total.toLocaleString();
+                } else if (durationMinutes > 0) {
+                    document.getElementById('summary-duration').textContent = 'ขั้นต่ำ 1 ชั่วโมง';
+                    document.getElementById('summary-total').textContent = '-';
+                } else {
+                    document.getElementById('summary-duration').textContent = 'เวลาไม่ถูกต้อง';
+                    document.getElementById('summary-total').textContent = '-';
+                }
+            } else {
+                summary.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

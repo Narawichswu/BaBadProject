@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เพิ่มสนามแบดมินตันใหม่ — BaBadminton">
+    <title>BaBadminton — เพิ่มสนามใหม่</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="bg-decoration"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="/dashboard" class="navbar-brand">
+                <span class="icon">🏸</span>
+                <span>BaBadminton</span>
+            </a>
+            <div class="navbar-nav">
+                <a href="/dashboard" class="nav-link" id="nav-dashboard">📊 Dashboard</a>
+                <a href="/search" class="nav-link" id="nav-search">🔍 ค้นหาสนาม</a>
+                <a href="/calendar" class="nav-link" id="nav-calendar">📅 ปฏิทิน</a>
+                <a href="/rooms/add" class="nav-link active" id="nav-add-court">➕ เพิ่มสนาม</a>
+                <div class="nav-user">
+                    <div class="avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+                    <div class="user-info">
+                        <span class="user-name"><%= user.username %></span>
+                        <span class="user-role"><%= user.role %></span>
+                    </div>
+                </div>
+                <a href="/logout" class="nav-link" id="nav-logout">🚪 ออก</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <div class="add-court-page">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">➕ เพิ่มสนามใหม่</h1>
+                <p class="page-subtitle">กรอกข้อมูลสนามแบดมินตันที่ต้องการเพิ่ม</p>
+            </div>
+
+            <!-- Add Court Form -->
+            <div class="glass-card" style="padding: 28px;">
+                <form method="POST" action="/rooms/add" id="add-court-form">
+                    <div class="form-group">
+                        <label class="form-label">🏸 ชื่อสนาม</label>
+                        <input type="text" name="name" class="form-control" placeholder="เช่น สนาม G" required id="court-name-input"
+                               oninput="updatePreview()">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">👥 ประเภทสนาม</label>
+                            <select name="courtType" class="form-control" id="court-type-select" onchange="updatePreview()">
+                                <option value="double">คู่ (Double)</option>
+                                <option value="single">เดี่ยว (Single)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">🏗️ พื้นสนาม</label>
+                            <select name="surface" class="form-control" id="court-surface-select" onchange="updatePreview()">
+                                <option value="synthetic">สังเคราะห์ (Synthetic)</option>
+                                <option value="wooden">ไม้ (Wooden)</option>
+                                <option value="cement">ซีเมนต์ (Cement)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">💰 ราคาต่อชั่วโมง (บาท)</label>
+                        <input type="number" name="pricePerHour" class="form-control" min="50" step="50" value="200" required
+                               id="court-price-input" oninput="updatePreview()">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">📝 คำอธิบาย</label>
+                        <input type="text" name="description" class="form-control" placeholder="คำอธิบายสนาม (ไม่บังคับ)"
+                               id="court-desc-input" oninput="updatePreview()">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">🏢 สิ่งอำนวยความสะดวก</label>
+                        <div class="facilities-grid">
+                            <label class="facility-checkbox">
+                                <input type="checkbox" name="facilities" value="💡 ไฟส่องสว่าง"> 💡 ไฟส่องสว่าง
+                            </label>
+                            <label class="facility-checkbox">
+                                <input type="checkbox" name="facilities" value="❄️ แอร์"> ❄️ แอร์
+                            </label>
+                            <label class="facility-checkbox">
+                                <input type="checkbox" name="facilities" value="🚿 ห้องอาบน้ำ"> 🚿 ห้องอาบน้ำ
+                            </label>
+                            <label class="facility-checkbox">
+                                <input type="checkbox" name="facilities" value="🅿️ ที่จอดรถ"> 🅿️ ที่จอดรถ
+                            </label>
+                            <label class="facility-checkbox">
+                                <input type="checkbox" name="facilities" value="📺 จอ Scoreboard"> 📺 จอ Scoreboard
+                            </label>
+                            <label class="facility-checkbox">
+                                <input type="checkbox" name="facilities" value="🧴 ล็อกเกอร์"> 🧴 ล็อกเกอร์
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Preview Card -->
+                    <div class="preview-card">
+                        <div class="preview-label">👁️ ตัวอย่างสนาม</div>
+                        <div class="court-card" id="preview-court-card">
+                            <div class="court-card-header">
+                                <span class="court-icon">🏸</span>
+                            </div>
+                            <div class="court-card-body">
+                                <div class="court-name" id="preview-name">สนามใหม่</div>
+                                <div class="court-meta">
+                                    <span class="court-badge badge-type" id="preview-type">👥 คู่</span>
+                                    <span class="court-badge badge-surface" id="preview-surface">🟢 สังเคราะห์</span>
+                                </div>
+                                <div class="court-price" id="preview-price">
+                                    ฿200 <span>/ ชั่วโมง</span>
+                                </div>
+                                <p style="font-size: 0.8rem; color: var(--text-muted);" id="preview-desc">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 24px;">
+                        <button type="submit" class="btn btn-success btn-lg" style="flex: 1;" id="btn-add-court">
+                            ✅ เพิ่มสนาม
+                        </button>
+                        <a href="/dashboard" class="btn btn-secondary btn-lg" id="btn-cancel">ยกเลิก</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updatePreview() {
+            const name = document.getElementById('court-name-input').value || 'สนามใหม่';
+            const type = document.getElementById('court-type-select').value;
+            const surface = document.getElementById('court-surface-select').value;
+            const price = document.getElementById('court-price-input').value || '200';
+            const desc = document.getElementById('court-desc-input').value || '-';
+
+            document.getElementById('preview-name').textContent = name;
+            document.getElementById('preview-type').textContent = type === 'double' ? '👥 คู่' : '👤 เดี่ยว';
+
+            const surfaceMap = { synthetic: '🟢 สังเคราะห์', wooden: '🟤 ไม้', cement: '⬜ ซีเมนต์' };
+            document.getElementById('preview-surface').textContent = surfaceMap[surface] || surface;
+
+            document.getElementById('preview-price').innerHTML = '฿' + parseInt(price).toLocaleString() + ' <span>/ ชั่วโมง</span>';
+            document.getElementById('preview-desc').textContent = desc;
+        }
+    </script>
+</body>
+</html>

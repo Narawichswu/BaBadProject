@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ค้นหาสนามแบดมินตันที่ว่าง เลือกวัน เวลา ประเภทสนาม">
+    <title>BaBadminton — ค้นหาสนาม</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="bg-decoration"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="/dashboard" class="navbar-brand">
+                <span class="icon">🏸</span>
+                <span>BaBadminton</span>
+            </a>
+            <div class="navbar-nav">
+                <a href="/dashboard" class="nav-link" id="nav-dashboard">📊 Dashboard</a>
+                <a href="/search" class="nav-link active" id="nav-search">🔍 ค้นหาสนาม</a>
+                <a href="/calendar" class="nav-link" id="nav-calendar">📅 ปฏิทิน</a>
+                <div class="nav-user">
+                    <div class="avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+                    <div class="user-info">
+                        <span class="user-name"><%= user.username %></span>
+                        <span class="user-role"><%= user.role %></span>
+                    </div>
+                </div>
+                <a href="/logout" class="nav-link" id="nav-logout">🚪 ออก</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">🔍 ค้นหาสนาม</h1>
+            <p class="page-subtitle">เลือกวันที่ เวลา และประเภทสนามที่ต้องการ</p>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-title">🎯 ตัวกรองการค้นหา</div>
+            <form method="POST" action="/search" id="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">📅 วันที่</label>
+                        <input type="date" name="date" class="form-control" required
+                               min="<%= new Date().toISOString().split('T')[0] %>"
+                               value="<%= searchData ? searchData.date : '' %>"
+                               id="search-date">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🕐 เวลาเริ่ม</label>
+                        <input type="time" name="startTime" class="form-control" required
+                               value="<%= searchData ? searchData.startTime : '' %>"
+                               id="search-start-time">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🕐 เวลาสิ้นสุด</label>
+                        <input type="time" name="endTime" class="form-control" required
+                               value="<%= searchData ? searchData.endTime : '' %>"
+                               id="search-end-time">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">🏸 ประเภทสนาม</label>
+                        <select name="courtType" class="form-control" id="search-court-type">
+                            <option value="all" <%= searchData && searchData.courtType === 'all' ? 'selected' : '' %>>ทั้งหมด</option>
+                            <option value="single" <%= searchData && searchData.courtType === 'single' ? 'selected' : '' %>>เดี่ยว (Single)</option>
+                            <option value="double" <%= searchData && searchData.courtType === 'double' ? 'selected' : '' %>>คู่ (Double)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🏗️ พื้นสนาม</label>
+                        <select name="surface" class="form-control" id="search-surface">
+                            <option value="all" <%= searchData && searchData.surface === 'all' ? 'selected' : '' %>>ทั้งหมด</option>
+                            <option value="synthetic" <%= searchData && searchData.surface === 'synthetic' ? 'selected' : '' %>>สังเคราะห์ (Synthetic)</option>
+                            <option value="wooden" <%= searchData && searchData.surface === 'wooden' ? 'selected' : '' %>>ไม้ (Wooden)</option>
+                            <option value="cement" <%= searchData && searchData.surface === 'cement' ? 'selected' : '' %>>ซีเมนต์ (Cement)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;" id="btn-search">
+                            🔍 ค้นหา
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Error Message -->
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error">⚠️ <%= error %></div>
+        <% } %>
+
+        <!-- Search Results -->
+        <% if (results !== null) { %>
+            <div class="section-header">
+                <h2 class="section-title">📋 ผลการค้นหา</h2>
+                <span class="text-muted" style="font-size: 0.85rem;"><%= results.length %> สนาม</span>
+            </div>
+
+            <% if (results.length === 0) { %>
+                <div class="empty-state glass-card" style="padding: 48px;">
+                    <div class="icon">🔍</div>
+                    <p>ไม่พบสนามที่ตรงกับเงื่อนไข</p>
+                </div>
+            <% } else { %>
+                <div class="courts-grid">
+                    <% results.forEach((court, index) => { %>
+                        <div class="court-card animate-in" id="result-court-<%= court.id %>">
+                            <div class="court-card-header">
+                                <span class="court-icon">🏸</span>
+                            </div>
+                            <div class="court-card-body">
+                                <div class="court-name"><%= court.name %></div>
+                                <div class="court-meta">
+                                    <span class="court-badge badge-type">
+                                        <%= court.courtType === 'double' ? '👥 คู่' : '👤 เดี่ยว' %>
+                                    </span>
+                                    <span class="court-badge badge-surface">
+                                        <% if (court.surface === 'synthetic') { %>🟢 สังเคราะห์
+                                        <% } else if (court.surface === 'wooden') { %>🟤 ไม้
+                                        <% } else { %>⬜ ซีเมนต์<% } %>
+                                    </span>
+                                    <span class="court-badge badge-<%= court.availability %>">
+                                        <span class="status-dot <%= court.availability %>"></span>
+                                        <% if (court.availability === 'available') { %>ว่าง
+                                        <% } else if (court.availability === 'pending') { %>รอการอนุมัติ
+                                        <% } else { %>ไม่ว่าง<% } %>
+                                    </span>
+                                </div>
+                                <div class="court-price">
+                                    ฿<%= court.pricePerHour %> <span>/ ชั่วโมง</span>
+                                </div>
+                                <% if (court.facilities && court.facilities.length > 0) { %>
+                                    <div class="court-facilities">
+                                        <% court.facilities.forEach(f => { %>
+                                            <span class="facility-tag"><%= f %></span>
+                                        <% }) %>
+                                    </div>
+                                <% } %>
+                                <% if (court.availability !== 'unavailable') { %>
+                                    <a href="/book/<%= court.id %>" class="btn btn-primary" style="width: 100%;" id="btn-book-<%= court.id %>">
+                                        จองสนามนี้
+                                    </a>
+                                <% } else { %>
+                                    <button class="btn btn-secondary" style="width: 100%; opacity: 0.5; cursor: not-allowed;" disabled>
+                                        ❌ ไม่ว่าง
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        <% } %>
+
+        <div class="mt-3">
+            <a href="/dashboard" class="btn btn-secondary" id="btn-back-dashboard">← กลับ Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>
