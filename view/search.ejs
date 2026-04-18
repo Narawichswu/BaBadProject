@@ -54,15 +54,30 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">🕐 เวลาเริ่ม</label>
-                        <input type="time" name="startTime" class="form-control" required
-                               value="<%= searchData ? searchData.startTime : '' %>"
-                               id="search-start-time">
+                        <select name="startTime" class="form-control form-control-time" required id="search-start-time">
+                            <% for(let h=6; h<=21; h++) { 
+                                const hh = h.toString().padStart(2, '0');
+                                ['00', '30'].forEach(m => {
+                                    const val = `${hh}:${m}`; 
+                                    const selected = searchData && searchData.startTime === val ? 'selected' : ''; %>
+                                    <option value="<%= val %>" <%= selected %>><%= val %></option>
+                                <% }); 
+                            } %>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">🕐 เวลาสิ้นสุด</label>
-                        <input type="time" name="endTime" class="form-control" required
-                               value="<%= searchData ? searchData.endTime : '' %>"
-                               id="search-end-time">
+                        <select name="endTime" class="form-control form-control-time" required id="search-end-time">
+                            <% for(let h=7; h<=22; h++) { 
+                                const hh = h.toString().padStart(2, '0');
+                                const sub = (h === 22) ? ['00'] : ['00', '30'];
+                                sub.forEach(m => {
+                                    const val = `${hh}:${m}`;
+                                    const selected = searchData && searchData.endTime === val ? 'selected' : ''; %>
+                                    <option value="<%= val %>" <%= selected %>><%= val %></option>
+                                <% });
+                            } %>
+                        </select>
                     </div>
                 </div>
                 <div class="form-row">

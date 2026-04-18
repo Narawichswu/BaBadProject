@@ -57,6 +57,17 @@ const searchRooms = async (req, res) => {
   try {
     const { date, startTime, endTime, courtType, surface } = req.body;
 
+    // Validate: only full hour or half hour (:00 or :30)
+    const isValidTime = (t) => t && (t.endsWith(':00') || t.endsWith(':30'));
+    if (!isValidTime(startTime) || !isValidTime(endTime)) {
+      return res.render('search', {
+        results: null,
+        searchData: { date, startTime, endTime, courtType, surface },
+        user: req.session.user,
+        error: 'เวลาที่เลือกต้องเป็นเต็มชั่วโมงหรือครึ่งชั่วโมงเท่านั้น'
+      });
+    }
+
     // Validate time range
     if (startTime >= endTime) {
       return res.render('search', {

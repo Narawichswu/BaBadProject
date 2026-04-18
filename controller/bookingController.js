@@ -37,6 +37,17 @@ const createBooking = async (req, res) => {
       return res.redirect('/dashboard');
     }
 
+    // Validate: only full hour or half hour (:00 or :30)
+    const isValidTime = (t) => t && (t.endsWith(':00') || t.endsWith(':30'));
+    if (!isValidTime(startTime) || !isValidTime(endTime)) {
+      return res.render('booking', {
+        room: court,
+        court,
+        error: 'เวลาที่เลือกต้องเป็นเต็มชั่วโมงหรือครึ่งชั่วโมงเท่านั้น',
+        user: req.session.user
+      });
+    }
+
     // Validate: end time must be after start time
     if (startTime >= endTime) {
       return res.render('booking', {
