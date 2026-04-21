@@ -10,7 +10,19 @@
     "test:coverage": "jest --coverage --collectCoverageFrom=\"model/**/*.js\" --coverageReporters=text --coverageReporters=text-summary",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write \"**/*.js\"",
+    "format:check": "prettier --check \"**/*.js\"",
+    "migrate": "node migrate.js up",
+    "migrate:rollback": "node migrate.js down",
+    "migrate:status": "node migrate.js status",
+    "security:setup": "node scripts/security-setup.js",
+    "docker:build": "docker build -t babadminton:latest .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "dependencies": {
     "connect-flash": "^0.1.1",

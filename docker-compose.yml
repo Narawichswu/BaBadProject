@@ -1,0 +1,144 @@
+# ─────────────────────────────────────────────────────────────
+# 🏸 BaBadminton - Docker Compose for Development & Production
+# Usage:
+#   Development: docker-compose up -d
+#   Production:  docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ─────────────────────────────────────────────────────────────
+
+version: '3.8'
+
+services:
+  # ────────────────────────────────────────────────────────────
+  # Application Service
+  # ────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: babadminton-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME:-babadminton}
+      - SESSION_SECRET=${SESSION_SECRET:-babadminton-secret-change-in-production}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Mount source code for development (hot reload)
+      - ./app.js:/app/app.js:ro
+      - ./controller:/app/controller:ro
+      - ./model:/app/model:ro
+      - ./view:/app/view:ro
+      - ./public:/app/public:ro
+      # Logs volume
+      - app-logs:/app/logs
+    networks:
+      - babadminton-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # ────────────────────────────────────────────────────────────
+  # Database Service (MySQL)
+  # ────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: babadminton-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-babadminton}
+      MYSQL_USER: ${DB_USER:-babadminton_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-userpassword}
+    volumes:
+      # Persistent data
+      - mysql-data:/var/lib/mysql
+      # Initialize database with schema
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    networks:
+      - babadminton-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      mysqld
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+
+  # ────────────────────────────────────────────────────────────
+  # phpMyAdmin (Optional - for development only)
+  # ────────────────────────────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: babadminton-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+    ports:
+      - "${PMA_PORT:-8080}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - babadminton-network
+    profiles:
+      - dev  # Only start with: docker-compose --profile dev up
+
+  # ────────────────────────────────────────────────────────────
+  # Redis (Optional - for caching in production)
+  # ────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: babadminton-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - babadminton-network
+    command: redis-server --appendonly yes
+    profiles:
+      - prod  # Only start with: docker-compose --profile prod up
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+# ─────────────────────────────────────────────────────────────
+# Networks
+# ─────────────────────────────────────────────────────────────
+networks:
+  babadminton-network:
+    driver: bridge
+
+# ─────────────────────────────────────────────────────────────
+# Volumes
+# ─────────────────────────────────────────────────────────────
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+  app-logs:
+    driver: local

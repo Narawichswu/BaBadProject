@@ -1,0 +1,40 @@
+{
+  "env": {
+    "node": true,
+    "commonjs": true,
+    "es2021": true,
+    "jest": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": "off",
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"],
+    "no-trailing-spaces": "error",
+    "no-multiple-empty-lines": ["error", { "max": 2 }],
+    "comma-dangle": ["error", "never"],
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-undef": "error",
+    "no-implicit-globals": "error",
+    "no-shadow": "warn",
+    "no-use-before-define": ["error", { "functions": false }],
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"],
+    "no-eval": "error",
+    "no-implied-eval": "error"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "coverage/",
+    "playwright-report/",
+    "test-results/",
+    "ScreenShot/"
+  ]
+}

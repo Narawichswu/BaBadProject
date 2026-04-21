@@ -16,6 +16,7 @@ const { initDatabase } = require('./model/database');
 const authController = require('./controller/authController');
 const roomController = require('./controller/roomController');
 const bookingController = require('./controller/bookingController');
+const healthController = require('./controller/healthController');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,7 +34,12 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'babadminton-secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    httpOnly: true,  // Prevent XSS access
+    secure: process.env.NODE_ENV === 'production',  // HTTPS only in production
+    sameSite: 'lax'  // CSRF protection
+  }
 }));
 
 // ── Passport Setup ──
@@ -87,6 +93,12 @@ app.use((req, res, next) => {
 });
 
 // ── Routes ──
+
+// Health Check Endpoints (must be before auth middleware)
+app.get('/health', healthController.getHealth);
+app.get('/metrics', healthController.getMetrics);
+app.get('/ready', healthController.getReadiness);
+app.get('/live', healthController.getLiveness);
 
 // Auth
 app.get('/', (req, res) => res.redirect('/login'));
@@ -154,8 +166,17 @@ async function startServer() {
     console.log('     Admin : admin / admin123');
     console.log('     User1 : user1 / 1234');
     console.log('     User2 : user2 / 1234');
+    console.log('');
+    console.log('  🏥 Health endpoints:');
+    console.log(`     GET /health  - Health check`);
+    console.log(`     GET /metrics - Prometheus metrics`);
+    console.log(`     GET /ready   - Readiness probe`);
+    console.log(`     GET /live    - Liveness probe`);
     console.log('🏸 ═══════════════════════════════════════');
     console.log('');
+    
+    // Mark server as initialized
+    global.serverInitialized = true;
   });
 }
 
