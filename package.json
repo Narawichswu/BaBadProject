@@ -1,13 +1,13 @@
 {
   "name": "babadminton-booking",
   "version": "2.0.0",
-  "description": "🏸 BaBadminton Court Booking System",
+  "description": "\ud83c\udff8 BaBadminton Court Booking System",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "node app.js",
-    "test": "jest --verbose",
-    "test:coverage": "jest --coverage --collectCoverageFrom=\"model/**/*.js\" --coverageReporters=text --coverageReporters=text-summary",
+    "test": "jest --verbose --testPathIgnorePatterns=tests/e2e",
+    "test:coverage": "jest --coverage --collectCoverageFrom=\"model/**/*.js\" --coverageReporters=text --coverageReporters=text-summary --testPathIgnorePatterns=tests/e2e",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
