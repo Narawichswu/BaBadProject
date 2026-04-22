@@ -7,7 +7,7 @@ const { pool } = require('./database');
 
 // ── Helper: Parse facilities string to array ──
 function parseFacilities(facilitiesStr) {
-  if (!facilitiesStr) return [];
+  if (!facilitiesStr) {return [];}
   return facilitiesStr.split(',').map(f => f.trim()).filter(f => f);
 }
 
@@ -60,7 +60,7 @@ module.exports = {
       [email, 'admin']
     );
 
-    if (rows.length > 0) return rows[0];
+    if (rows.length > 0) {return rows[0];}
 
     const avatar = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
     const [result] = await pool.query(

@@ -9,7 +9,7 @@ test.describe('Search Flows', () => {
   test.beforeEach(async ({ page }) => {
     searchPage = new SearchPage(page);
     loginPage = new LoginPage(page);
-    
+
     await loginPage.goto();
     await loginPage.login('user1', '1234');
     await searchPage.goto();
@@ -19,7 +19,7 @@ test.describe('Search Flows', () => {
     // Leave fields empty and try to search
     // Using evaluate to bypass HTML5 validation or just test standard behavior
     await searchPage.search('', '', '');
-    
+
     // Playwright does not click if validation fails in HTML5 form easily unless bypassed
     // So we just ensure it doesn't navigate away from /search and url doesn't have query
     await expect(page).toHaveURL(/\/search/);
@@ -37,15 +37,15 @@ test.describe('Search Flows', () => {
   test('Search behavior when no courts are available for a very long range', async ({ page }) => {
     await searchPage.search('2030-01-01', '08:00', '10:00');
     await expect(page).toHaveURL(/\/search/);
-    
+
     // Check if courts are loaded or empty state is shown
     const emptyState = page.locator('.empty-state');
     const courtsCount = await searchPage.courtResults.count();
-    
+
     if (courtsCount === 0) {
-       await expect(emptyState).toBeVisible();
+      await expect(emptyState).toBeVisible();
     } else {
-       expect(courtsCount).toBeGreaterThan(0);
+      expect(courtsCount).toBeGreaterThan(0);
     }
   });
 
@@ -55,7 +55,7 @@ test.describe('Search Flows', () => {
     const dateString = futureDate.toISOString().split('T')[0];
 
     await searchPage.search(dateString, '08:00', '09:00');
-    
+
     const count = await searchPage.courtResults.count();
     if (count > 0) {
       const bookButton = searchPage.courtResults.first().locator('a.btn-primary');

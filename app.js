@@ -168,13 +168,13 @@ async function startServer() {
     console.log('     User2 : user2 / 1234');
     console.log('');
     console.log('  🏥 Health endpoints:');
-    console.log(`     GET /health  - Health check`);
-    console.log(`     GET /metrics - Prometheus metrics`);
-    console.log(`     GET /ready   - Readiness probe`);
-    console.log(`     GET /live    - Liveness probe`);
+    console.log('     GET /health  - Health check');
+    console.log('     GET /metrics - Prometheus metrics');
+    console.log('     GET /ready   - Readiness probe');
+    console.log('     GET /live    - Liveness probe');
     console.log('🏸 ═══════════════════════════════════════');
     console.log('');
-    
+
     // Mark server as initialized
     global.serverInitialized = true;
   });

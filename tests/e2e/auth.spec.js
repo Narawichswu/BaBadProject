@@ -8,7 +8,7 @@ test.describe('Auth Flow', () => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
     await loginPage.login('admin', 'admin123');
-    
+
     await expect(page).toHaveURL('/dashboard');
     await expect(page.locator('.user-name')).toHaveText('admin');
   });
@@ -17,7 +17,7 @@ test.describe('Auth Flow', () => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
     await loginPage.login('user1', '1234');
-    
+
     await expect(page).toHaveURL('/dashboard');
     await expect(page.locator('.user-name')).toHaveText('user1');
   });
@@ -26,7 +26,7 @@ test.describe('Auth Flow', () => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
     await loginPage.login('wronguser', '1234');
-    
+
     await expect(page).toHaveURL(/login/);
     await expect(loginPage.errorMessage).toBeVisible();
   });
@@ -35,7 +35,7 @@ test.describe('Auth Flow', () => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
     await loginPage.login('admin', 'wrongpass');
-    
+
     await expect(page).toHaveURL(/login/);
     await expect(loginPage.errorMessage).toBeVisible();
   });
@@ -43,11 +43,11 @@ test.describe('Auth Flow', () => {
   test('5. Logout functionality', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const dashboardPage = new DashboardPage(page);
-    
+
     await loginPage.goto();
     await loginPage.login('user1', '1234');
     await expect(page).toHaveURL('/dashboard');
-    
+
     await dashboardPage.logout();
     await expect(page).toHaveURL('/login');
   });

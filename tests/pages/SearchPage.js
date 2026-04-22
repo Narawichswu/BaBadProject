@@ -13,9 +13,9 @@ class SearchPage {
   }
 
   async search(date, startTime, endTime) {
-    if (date) await this.dateInput.fill(date);
-    if (startTime) await this.startTimeInput.selectOption(startTime);
-    if (endTime) await this.endTimeInput.selectOption(endTime);
+    if (date) {await this.dateInput.fill(date);}
+    if (startTime) {await this.startTimeInput.selectOption(startTime);}
+    if (endTime) {await this.endTimeInput.selectOption(endTime);}
     await this.searchButton.click();
   }
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Database Migration Runner
- * 
+ *
  * Usage:
  *   node migrate.js up       - Run all pending migrations
  *   node migrate.js down     - Rollback last migration
@@ -70,20 +70,20 @@ async function runUp(connection) {
 
   for (const file of pending) {
     console.log(`▶️  Running: ${file}`);
-    
+
     try {
       const migration = require(path.join(MIGRATIONS_DIR, file));
-      
+
       if (typeof migration.up !== 'function') {
         throw new Error('Migration must export an up() function');
       }
 
       await migration.up(connection);
-      
+
       await connection.query(`
         INSERT INTO ${MIGRATIONS_TABLE} (name) VALUES (?)
       `, [file]);
-      
+
       console.log(`✅ Completed: ${file}\n`);
     } catch (error) {
       console.error(`❌ Failed: ${file}`);
@@ -97,7 +97,7 @@ async function runUp(connection) {
 
 async function runDown(connection) {
   const executed = await getExecutedMigrations(connection);
-  
+
   if (executed.length === 0) {
     console.log('✅ No migrations to rollback');
     return;
@@ -108,17 +108,17 @@ async function runDown(connection) {
 
   try {
     const migration = require(path.join(MIGRATIONS_DIR, lastMigration));
-    
+
     if (typeof migration.down !== 'function') {
       throw new Error('Migration must export a down() function');
     }
 
     await migration.down(connection);
-    
+
     await connection.query(`
       DELETE FROM ${MIGRATIONS_TABLE} WHERE name = ?
     `, [lastMigration]);
-    
+
     console.log(`✅ Rollback completed: ${lastMigration}`);
   } catch (error) {
     console.error(`❌ Rollback failed: ${lastMigration}`);
@@ -133,7 +133,7 @@ async function showStatus(connection) {
 
   console.log('\n📊 Migration Status\n');
   console.log('Applied:');
-  
+
   if (executed.length === 0) {
     console.log('  (none)');
   } else {
@@ -143,7 +143,7 @@ async function showStatus(connection) {
   }
 
   console.log('\nPending:');
-  
+
   const pending = files.filter(file => !executed.includes(file));
   if (pending.length === 0) {
     console.log('  (none)');
@@ -173,23 +173,23 @@ async function main() {
 
   try {
     console.log('🏸 BaBadminton - Database Migration Tool\n');
-    console.log(`📡 Connecting to database...`);
-    
+    console.log('📡 Connecting to database...');
+
     connection = await getDatabaseConnection();
     await ensureMigrationsTable(connection);
-    
+
     console.log('✅ Connected\n');
 
     switch (command) {
-      case 'up':
-        await runUp(connection);
-        break;
-      case 'down':
-        await runDown(connection);
-        break;
-      case 'status':
-        await showStatus(connection);
-        break;
+    case 'up':
+      await runUp(connection);
+      break;
+    case 'down':
+      await runDown(connection);
+      break;
+    case 'status':
+      await showStatus(connection);
+      break;
     }
   } catch (error) {
     console.error('\n❌ Migration failed:', error.message);

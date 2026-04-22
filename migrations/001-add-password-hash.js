@@ -1,10 +1,10 @@
 /**
  * Migration 001: Add password hashing support
- * 
+ *
  * This migration:
  * 1. Adds password_hash column to users table
  * 2. Migrates existing plain-text passwords to bcrypt hashes
- * 
+ *
  * Run with: node migrate.js up
  */
 

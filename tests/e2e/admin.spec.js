@@ -20,10 +20,10 @@ test.describe('Admin Flows', () => {
   test('Admin successfully adds a new court', async ({ page }) => {
     await loginPage.goto();
     await loginPage.login('admin', 'admin123');
-    
+
     await addRoomPage.goto();
     await expect(page).toHaveURL(/\/rooms\/add/);
-    
+
     await addRoomPage.addCourt({
       name: testCourtName,
       courtType: 'double',
@@ -32,7 +32,7 @@ test.describe('Admin Flows', () => {
       description: 'A dedicated test court',
       facilities: ['💡 ไฟส่องสว่าง', '❄️ แอร์']
     });
-    
+
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.locator('body')).toContainText(testCourtName);
   });
@@ -40,16 +40,16 @@ test.describe('Admin Flows', () => {
   test('Admin validation errors when adding a court with missing details', async ({ page }) => {
     await loginPage.goto();
     await loginPage.login('admin', 'admin123');
-    
+
     await addRoomPage.goto();
-    
+
     // leave required fields (like name/price) empty and submit
     await addRoomPage.addCourt({
-        name: '',
-        courtType: 'double',
-        surface: 'synthetic',
-        pricePerHour: '',
-        description: ''
+      name: '',
+      courtType: 'double',
+      surface: 'synthetic',
+      pricePerHour: '',
+      description: ''
     });
 
     // Should not bypass HTML validation, therefore not redirecting
@@ -58,10 +58,10 @@ test.describe('Admin Flows', () => {
 
   test('Non-admin blocked from Add Court endpoint', async ({ page }) => {
     await loginPage.goto();
-    await loginPage.login('user1', '1234'); 
-    
+    await loginPage.login('user1', '1234');
+
     await addRoomPage.goto();
-    
+
     // The backend renders the login view with a 403 status code but leaves URL intact
     // We should expect the error alert to be visible
     const alertLocator = page.locator('.alert-error');

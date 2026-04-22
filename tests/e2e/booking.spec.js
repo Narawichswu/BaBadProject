@@ -14,7 +14,7 @@ test.describe('Booking Flows', () => {
   test.beforeEach(async ({ page }) => {
     bookingPage = new BookingPage(page);
     loginPage = new LoginPage(page);
-    
+
     await loginPage.goto();
     await loginPage.login('user1', '1234');
   });
@@ -25,45 +25,45 @@ test.describe('Booking Flows', () => {
 
   test('Successful booking creation', async ({ page }) => {
     await bookingPage.goto(1); // Assuming Court 1 exists
-    
+
     const title = await page.title();
     if (title.includes('Not Found') || title.includes('Error')) {
-       test.skip('Court 1 not found. Skipping test.');
-       return;
+      test.skip('Court 1 not found. Skipping test.');
+      return;
     }
-    
+
     await bookingPage.book(testDate, '08:00', '10:00');
-    
+
     // Should redirect to dashboard on success
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
   test('Unsuccessful booking with missing fields', async ({ page }) => {
     await bookingPage.goto(1);
-    
+
     const title = await page.title();
     if (title.includes('Not Found') || title.includes('Error')) {
-       test.skip('Court 1 not found. Skipping test.');
-       return;
+      test.skip('Court 1 not found. Skipping test.');
+      return;
     }
 
     await bookingPage.book('', '', '');
-    
+
     // Should stay on the booking page
     await expect(page).toHaveURL(/\/book\/1/);
   });
 
   test('Prevent booking with past dates', async ({ page }) => {
     await bookingPage.goto(1);
-    
+
     const title = await page.title();
     if (title.includes('Not Found') || title.includes('Error')) {
-       test.skip('Court 1 not found. Skipping test.');
-       return;
+      test.skip('Court 1 not found. Skipping test.');
+      return;
     }
 
     await bookingPage.book('2020-01-01', '08:00', '10:00');
-    
+
     // Validation prevents submission, URL stays the same
     await expect(page).toHaveURL(/\/book\/1/);
   });

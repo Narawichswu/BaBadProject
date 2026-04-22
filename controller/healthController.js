@@ -1,6 +1,6 @@
 /**
  * Health Check Controller
- * 
+ *
  * Provides endpoints for monitoring application health and metrics
  */
 

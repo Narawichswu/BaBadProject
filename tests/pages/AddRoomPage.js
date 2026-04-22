@@ -14,12 +14,12 @@ class AddRoomPage {
   }
 
   async addCourt(options) {
-    if (options.name) await this.nameInput.fill(options.name);
-    if (options.courtType) await this.courtTypeSelect.selectOption(options.courtType);
-    if (options.surface) await this.surfaceSelect.selectOption(options.surface);
-    if (options.pricePerHour) await this.priceInput.fill(options.pricePerHour.toString());
-    if (options.description) await this.descriptionInput.fill(options.description);
-    
+    if (options.name) {await this.nameInput.fill(options.name);}
+    if (options.courtType) {await this.courtTypeSelect.selectOption(options.courtType);}
+    if (options.surface) {await this.surfaceSelect.selectOption(options.surface);}
+    if (options.pricePerHour) {await this.priceInput.fill(options.pricePerHour.toString());}
+    if (options.description) {await this.descriptionInput.fill(options.description);}
+
     if (options.facilities) {
       for (const facility of options.facilities) {
         await this.page.locator(`input[name="facilities"][value="${facility}"]`).check();

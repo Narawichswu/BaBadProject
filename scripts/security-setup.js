@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * 🔐 BaBadminton - Security Setup Script
- * 
+ *
  * This script:
  * 1. Hashes all existing plain-text passwords
  * 2. Adds password_hash column to users table
  * 3. Validates password policy
- * 
+ *
  * Usage: node scripts/security-setup.js
  */
 
@@ -77,21 +77,21 @@ async function main() {
       console.log('✅ All users already have hashed passwords\n');
     } else {
       console.log(`⚠️  Found ${users.length} user(s) with plain-text passwords\n`);
-      
+
       // Hash passwords
       console.log('🔐 Hashing passwords...');
       for (const user of users) {
         console.log(`  - Hashing password for ${user.email}...`);
-        
+
         const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
-        
+
         await connection.query(`
           UPDATE users 
           SET password_hash = ?
           WHERE id = ?
         `, [hashedPassword, user.id]);
-        
-        console.log(`    ✅ Hashed successfully`);
+
+        console.log('    ✅ Hashed successfully');
       }
       console.log('✅ All passwords hashed\n');
     }
