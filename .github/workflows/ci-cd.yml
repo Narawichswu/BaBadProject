@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-cd-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_VERSION: '20'
   MYSQL_VERSION: '8.0'
@@ -16,6 +20,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     
     services:
       mysql:
@@ -50,7 +55,7 @@ jobs:
           if [ ! -f .eslintrc.json ]; then
             echo '{"extends": "eslint:recommended","env":{"node":true,"jest":true},"rules":{"no-unused-vars":"warn"}}' > .eslintrc.json
           fi
-          npx eslint . --ext .js || echo "⚠️ ESLint warnings found (non-blocking)"
+          npx eslint@8 . --ext .js || echo "⚠️ ESLint warnings found (non-blocking)"
 
       - name: 🧪 Run unit tests with coverage
         run: npm run test:coverage
@@ -62,7 +67,7 @@ jobs:
           DB_NAME: babadminton_test
 
       - name: 📊 Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage/coverage-final.json
           fail_ci_if_error: false
@@ -92,7 +97,7 @@ jobs:
           CI: true
 
       - name: 📸 Upload Playwright report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
@@ -100,7 +105,7 @@ jobs:
           retention-days: 30
 
       - name: 📄 Upload server logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: server-logs
@@ -112,6 +117,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   security:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: test
     if: always() && needs.test.result == 'success'
 
@@ -137,7 +143,7 @@ jobs:
           }
 
       - name: 🛡️ Run Snyk security scan
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@0.4.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -156,6 +162,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [test, security]
     if: always() && needs.test.result == 'success' && needs.security.result != 'failure'
 
@@ -174,7 +181,7 @@ jobs:
           echo "✅ Docker image built successfully"
 
       - name: 📦 Upload Docker image as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docker-image
           path: |
@@ -187,6 +194,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   deploy-staging:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: build
     if: github.ref == 'refs/heads/develop'
     environment:
@@ -214,7 +222,7 @@ jobs:
           echo "✅ Staging health check passed"
 
       - name: 💬 Notify Slack (staging)
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v2
         if: always()
         with:
           payload: |
@@ -231,6 +239,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   deploy-production:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: build
     if: github.ref == 'refs/heads/main'
     environment:
@@ -264,7 +273,7 @@ jobs:
           echo "✅ Smoke tests passed"
 
       - name: 💬 Notify Slack (production)
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v2
         if: always()
         with:
           payload: |
