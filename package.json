@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node app.js",
-    "test": "jest --verbose",
+    "test": "jest --verbose --testPathIgnorePatterns=\"tests/e2e\"",
     "test:coverage": "jest --coverage --collectCoverageFrom=\"model/**/*.js\" --coverageReporters=text --coverageReporters=text-summary",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",

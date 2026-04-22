@@ -72,8 +72,8 @@ describe('User Management', () => {
     const result = await data.findUser('admin', 'admin123');
     expect(result).toEqual(mockUser);
     expect(mockQuery).toHaveBeenCalledWith(
-      'SELECT * FROM users WHERE username = ? AND password = ?',
-      ['admin', 'admin123']
+      'SELECT * FROM users WHERE username = ?',
+      ['admin']
     );
   });
 

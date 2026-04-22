@@ -3,6 +3,7 @@
 // ============================================
 
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -27,6 +28,7 @@ async function initDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(100) NOT NULL,
         password VARCHAR(255) DEFAULT NULL,
+        password_hash VARCHAR(255) DEFAULT NULL,
         role ENUM('admin', 'user') DEFAULT 'user',
         email VARCHAR(255) DEFAULT NULL,
         avatar VARCHAR(500) DEFAULT NULL,
@@ -66,11 +68,15 @@ async function initDatabase() {
     const [userRows] = await conn.query('SELECT COUNT(*) as count FROM users');
     if (userRows[0].count === 0) {
       await conn.query(`
-        INSERT INTO users (username, password, role, email) VALUES
-          ('admin', 'admin123', 'admin', 'admin@babadminton.com'),
-          ('user1', '1234', 'user', 'user1@babadminton.com'),
-          ('user2', '1234', 'user', 'user2@babadminton.com')
-      `);
+        INSERT INTO users (username, password, password_hash, role, email) VALUES
+          ('admin', 'admin123', ?, 'admin', 'admin@babadminton.com'),
+          ('user1', '1234', ?, 'user', 'user1@babadminton.com'),
+          ('user2', '1234', ?, 'user', 'user2@babadminton.com')
+      `, [
+        bcrypt.hashSync('admin123', 10),
+        bcrypt.hashSync('1234', 10),
+        bcrypt.hashSync('1234', 10)
+      ]);
       console.log('  ✅ Seeded default users');
     }
 

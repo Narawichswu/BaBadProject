@@ -4,6 +4,7 @@
 // ============================================
 
 const { pool } = require('./database');
+const bcrypt = require('bcrypt');
 
 // ── Helper: Parse facilities string to array ──
 function parseFacilities(facilitiesStr) {
@@ -47,10 +48,22 @@ module.exports = {
 
   findUser: async (username, password) => {
     const [rows] = await pool.query(
-      'SELECT * FROM users WHERE username = ? AND password = ?',
-      [username, password]
+      'SELECT * FROM users WHERE username = ?',
+      [username]
     );
-    return rows[0] || null;
+    const user = rows[0];
+    
+    if (user && user.password_hash) {
+      const match = await bcrypt.compare(password, user.password_hash);
+      if (match) return user;
+    }
+    
+    // Fallback for plain-text (if any left)
+    if (user && user.password === password) {
+      return user;
+    }
+    
+    return null;
   },
 
   findOrCreateGoogleUser: async (profile) => {
